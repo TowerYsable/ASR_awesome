@@ -6,6 +6,81 @@
 
 1 Deep Context 1808.02480.pdf
 
+## review and future
+
+#### The History of Speech Recognition to the Year 2030 
+
+#### Recent Advances in End-to-End Automatic Speech Recognition
+
+相对于传统的混合模型的ASR，端到端E2E的ASR系统具备以下优点：
+
+- 混合模型的每个模块优化都是单独优化，不能保证获取全局最优，而E2E的ASR使用一个优化函数来优化整个网络；
+- E2E的ASR直接输出character或者words，简化流程；而混合模型的每个模块都需要相应的专业知识；
+- 相对于混合模型，e2e模型使用一个网络进行识别，整个系统更加紧凑，可以更便捷在设备上部署。
+
+虽然端到端的ASR具备以上优点，而且在很多benchmarks超过混合模型，但混合模型在工业界依然占据主要市场。混合模型在工业界发展数十年，在streaming,latency,adaptation capability,accuracy等方面的方案技术有较厚的积累，e2e的asr要想替代混合模型，必须在以上诸多方面超越混合模型。
+
+本文为了促进e2e的asr方案落地，从工业界的角度对近年来的e2e的方案进行总结，更好的应对以上的挑战。
+
+##### end-to-end ASR
+
+- CTC (connectionist temporak classification)
+- AED (attention-based Encoder-Decoder)
+  - 其为了实现streaming方式，需要对attention进行处理,**Fig 3**
+- RNN-T (Recurrent Neural Network Transducer)
+
+<img src="readme.assets/image-20211203162636723.png" alt="image-20211203162636723" style="zoom:50%;" /><img src="readme.assets/image-20211203162648763.png" alt="image-20211203162648763" style="zoom:50%;" />
+
+<img src="readme.assets/image-20211203162854687.png" alt="image-20211203162854687" style="zoom: 45%;" /><img src="readme.assets/image-20211203163001772.png" alt="image-20211203163001772" style="zoom: 45%;" />
+
+<img src="readme.assets/image-20211203162756389.png" alt="image-20211203162756389" style="zoom:50%;" />
+
+##### Encoder
+
+- LSTM
+- Transformer
+  - 为了实现streaming ASR，需要在attention使用mask策略，使其只看到部分的context。图6展示了不同的attenion及对应的mask矩阵。
+
+<img src="readme.assets/image-20211203163059159.png" alt="image-20211203163059159" style="zoom:67%;" />
+
+<img src="readme.assets/image-20211203163221986.png" alt="image-20211203163221986" style="zoom:67%;" />
+
+##### training criterion
+
+-  teacher-student learning
+- Minimum Word Error Rate Traing
+
+##### 多语言模型以及方案
+
+介绍了使用语言ID（LID)的优劣和CMM方案，以及code-switching在句内和句间的挑战。
+
+<img src="readme.assets/image-20211203163517301.png" alt="image-20211203163517301" style="zoom:50%;" />
+
+##### adaptation
+
+- speaker adaptation
+- domain adaptation
+- Customization --> CLSA
+
+![image-20211203164135566](readme.assets/image-20211203164135566.png)
+
+#####  Advanced Models
+
+- Non-Autoregressive Models
+- Unified Models, 流式和非流式方案的结合，动态计算等等
+- Two-pass Models
+- Multi-talker Models
+- Multi-channel Models
+
+##### more
+
+- 更多语音的toolkits
+- 系统使用的建模单元：characters,word-piece,words
+- limited data，data augmentation, self-supervised
+- 模型部署的研究，模型压缩，量化等等
+- asr模型的输入直接使用waveform而不是声学特征
+- 鲁棒性的研究
+
 ## Awesome Contextualization of E2E ASR
 
 问题提出：对于产品级的自动语音识别（Automatic Speech Recognition, ASR）,能够适应专有领域的语境偏移（contextual bias），是一个很重要的功能。举个例子，对于手机上的ASR，系统要能准确识别出用户说的app的名字，联系人的名字等等，而不是发音相同的其他词。更具体一点，比如读作“Yao Ming”的这个词语，在体育领域可能是我们家喻户晓的运动员“姚明”，但是在手机上，它可能是我们通讯录里面一个叫做“姚敏”的朋友。如何随着应用领域的变化，解决这种偏差问题就是我们这个系列的文章要探索的主要问题。
@@ -164,11 +239,23 @@ fast contextual adaptation has shown to be effective in improving Automatic Spee
 
    c) optimization processs based: regularization(dropout, specaugment)
 
-## System measuring fairness
+## datasets
 
 #### Towards Measuring Fairness in Speech Recognition: Casual Conversations Dataset Transcriptions
 
 开源一个带诸多metadata属性(性别，年龄，肤色等等）的闲聊Casual Conversations语音测试集，并使用该测试集对ASR系统进行fairness评估，发掘更多影响ASR效果的诸多因素，为开发更加鲁棒的ASR系统做贡献
+
+#### The People's Speech: A Large-Scale Diverse English Speech Recognition Dataset for Commercial Usage
+
+开源30000小时的英文ASR语料，该语料是可以商用的
+
+## Streaming
+
+#### A comparison of streaming models and data augmentation methods for robust speech recognition
+
+对比端到端流式ASR系统Monotonic Chunkwise Attention (MoChA) 和 Recurrent Neural Network-Transducer (RNN-T)的性能以及multi-conditioned training using an acoustic simulator, Vocal Tract Length Perturbation (VTLP) for speaker variability, and SpecAugment等数据增广对比试验，主要为经验分享
+
+
 
 ## on-device
 
@@ -249,7 +336,9 @@ fast contextual adaptation has shown to be effective in improving Automatic Spee
 >
 > code: [georgesterpu/avsr-tf1: Audio-Visual Speech Recognition using Sequence to Sequence Models (github.com)](https://github.com/georgesterpu/avsr-tf1)
 
+## zero shot learning
 
+#### Scaling ASR Improves Zero and Few Shot Learning
 
 
 
