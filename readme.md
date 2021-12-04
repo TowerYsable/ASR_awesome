@@ -67,9 +67,22 @@
 #####  Advanced Models
 
 - Non-Autoregressive Models
+
+  - 自回归（AutoRegressive, AR）模型又称为时间序列模型
+  - 不同于自回归(Autoregressive Translation , ART)模型需要用已生成的词来预测下一个位置的词，非自回归 (Non-Autoregressive Translation, NART)模型打破了生成时的串行顺序，希望一次能够解码出整个目标句子，从而解决AT模型所带来的问题。
+
+  <img src="readme.assets/image-20211203212301108.png" alt="image-20211203212301108" style="zoom:50%;" />
+
 - Unified Models, 流式和非流式方案的结合，动态计算等等
+
+  <img src="readme.assets/image-20211203212322685.png" alt="image-20211203212322685" style="zoom:50%;" />
+
 - Two-pass Models
+
+  <img src="readme.assets/image-20211203212337481.png" alt="image-20211203212337481" style="zoom:50%;" />
+
 - Multi-talker Models
+
 - Multi-channel Models
 
 ##### more
@@ -263,7 +276,19 @@ fast contextual adaptation has shown to be effective in improving Automatic Spee
 
 - [How to make on-device speech recognition practical - Amazon Science](https://www.amazon.science/blog/how-to-make-on-device-speech-recognition-practical)
 
+#### Tied & Reduced RNN-T Decoder
 
+优化RNN-T的decoder的大小。
+
+#### Dyn-ASR
+
+Compact, Multilingual Speech Recognition via Spoken Language and Accent Identification
+
+研究如何在边缘设备上进行多语言ASR的部署。在边缘设备上部署多语言ASR是一件具有挑战的任务，因为边缘设备提供的计算资源和存储资源受到极大的限制。现在的终端设备提供的ASR服务更多采用云服务的方式，这种类型的服务的latency相对较大一些。本文设计一种在边缘设备上部署多语言ASR的架构：Dyn-ASR，该架构不仅性能表现优异，而且资源开销较小。
+
+方法：先对wav文件进行预处理，然后通过language和accent模块进行语言和方言类型的识别，然后通过<language id, accent id>来选择相对应的识别模型进行加载和推理。其中<language id, accent id>对应的模型是在预训练模型上进行的微调，这样可以提高准确率。
+
+<img src="readme.assets/image-20211203212854638.png" alt="image-20211203212854638" style="zoom:50%;" />
 
 ## CTC
 
@@ -271,7 +296,11 @@ fast contextual adaptation has shown to be effective in improving Automatic Spee
 
 - we prove that a feed-forward neural network trained with CTC from uniform initialization converges towards peaky behavior with a 100% error rate.
 
+## LM
 
+#### Adapting GPT, GPT-2 and BERT Language Models for Speech Recognition
+
+预训练模型的Bert, GPT,GPT2为下游诸多nlp任务提供很好的帮助，但其在ASR中应用却很少研究，因此本文主要研究这些预训练模型Bert, GPT,GPT2在ASR中的应用。
 
 ## Augment data
 
