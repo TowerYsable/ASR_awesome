@@ -696,7 +696,7 @@ mask.unsqueeze(1)是为了增加一个head维度。此时:
 
 基于chunk的attention，本质上是去限制attention的作用范围，可以通过attention mask来实现。
 
-![图片](https://mmbiz.qpic.cn/mmbiz_png/FNwn7wEvTjgvCagp417wgAs2icawV9Zd0B7OdtP23icfuHhWqPByLCyAgMtJXPr6HZwceEERL2GYowg6elkp4CaA/640?wx_fmt=png&tp=webp&wxfrom=5&wx_lazy=1&wx_co=1)
+![图片](wenet.assets/640)
 
 - subsequent_chunk_mask方法用于创建一个固定大小chunk的mask。
 - add_optional_chunk_mask方法则用于创建动态大小的chunk的mask。
