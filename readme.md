@@ -4,7 +4,20 @@
 
 [The Top 98 Automatic Speech Recognition Open Source Projects on Github (awesomeopensource.com)](https://awesomeopensource.com/projects/automatic-speech-recognition)
 
-1 Deep Context 1808.02480.pdf
+## wenet-e2e
+
+github/com/wenet-e2e
+
+- motivation
+  - 流式问题
+  - 产品化问题：LM支持、Endpoint问题、时间戳、热词
+  - 研究模型到产品模型转化的问题
+- 面向产品级、工业级的端到端语音识别全栈式解决方案
+  - 产品第一
+  - 轻量级
+  - 准确率高
+
+
 
 ## review and future
 
@@ -72,6 +85,8 @@
   - 不同于自回归(Autoregressive Translation , ART)模型需要用已生成的词来预测下一个位置的词，非自回归 (Non-Autoregressive Translation, NART)模型打破了生成时的串行顺序，希望一次能够解码出整个目标句子，从而解决AT模型所带来的问题。
 
   <img src="readme.assets/image-20211203212301108.png" alt="image-20211203212301108" style="zoom:50%;" />
+
+  > Streaming End-to-End ASR based on Blockwise Non-Autoregressive Models
 
 - Unified Models, 流式和非流式方案的结合，动态计算等等
 
@@ -210,7 +225,7 @@ In this paper, we propose a technique for incorporating contextual signals, such
 
 #### DEEP SHALLOW FUSION FOR RNN-T PERSONALIZATION
 
- In this work, we present novel techniques to improve RNN-T’s ability to model rare WordPieces, infuse extra information into the encoder, enable the use of alternative graphemic pronunciations, and perform deep fusion with personalized language models for more robust biasing. 
+In this work, we present novel techniques to improve RNN-T’s ability to model rare WordPieces, infuse extra information into the encoder, enable the use of alternative graphemic pronunciations, and perform deep fusion with personalized language models for more robust biasing. 
 
 #### Contextualized Streaming End-to-End Speech Recognition with Trie-Based Deep Biasing and Shallow Fusion
 
@@ -261,6 +276,14 @@ fast contextual adaptation has shown to be effective in improving Automatic Spee
 #### The People's Speech: A Large-Scale Diverse English Speech Recognition Dataset for Commercial Usage
 
 开源30000小时的英文ASR语料，该语料是可以商用的
+
+#### AliMeeting
+
+> https://github.com/yafan-aslp/AiMeeting
+
+#### GigaSpeech
+
+#### WenetSpeech
 
 ## Streaming
 
@@ -353,6 +376,24 @@ Compact, Multilingual Speech Recognition via Spoken Language and Accent Identifi
 - some package
   - [scottykwok/cantonese-selfish-project: Cantonese Selfish Project 廣東話自肥企劃 at PYCON HK 2021 (github.com)](https://github.com/scottykwok/cantonese-selfish-project/)
 
+## Non-Autoregressive
+
+#### Streaming End-to-End ASR based on Blockwise Non-Autoregressive Models
+
+非自回归的模型受到极大的关注，尤其在rtf的优势，但其结果往往弱于自回归模型。本文结合mask-ctc和blockwise-attention,提出新的streming e2e asr，其结果相比于mask-ctc,其错误率更低。
+
+图1为本文的详细设计，我们先看一下整体流程。输入的audio先进行block的划分，按照以往经验，block的边缘部分常会出现插入和删除错误，因此本文设计block之间存在50%的重叠部分，即每一帧被处理两遍。每个block数据经过blockwise-attention encoder处理后（每次处理都看到前一个block和当前block内容）使用greedy算法进行处理，对于重叠部分的处理本文采用算法1所示的dynamic map。接下来对预测的token输入到被称为masked language model(MLM)，该模型对dynamic mapping的结果具有较低的confidence的token进行重新预测，经过多轮调整输出最终的结果。训练函数为公式3所示。
+
+<img src="https://mmbiz.qpic.cn/mmbiz_png/FNwn7wEvTjj39dNFkSrvUlDRGdhZ5nmBv1VO82E3rwqlhTmn4LhSTxojH25hkHcSdeOyOiatQy7Oc3XsTzpTfrw/640?wx_fmt=png&tp=webp&wxfrom=5&wx_lazy=1&wx_co=1" alt="图片" style="zoom:50%;" />
+
+<img src="https://mmbiz.qpic.cn/mmbiz_png/FNwn7wEvTjj39dNFkSrvUlDRGdhZ5nmBe32e9OYbXyOrv3Qj3kXgx9Lxn52JfBppHWSjV1tiafjiaT9vtqWSgykg/640?wx_fmt=png&tp=webp&wxfrom=5&wx_lazy=1&wx_co=1" alt="图片" style="zoom: 33%;" />
+
+
+
+<img src="https://mmbiz.qpic.cn/mmbiz_png/FNwn7wEvTjj39dNFkSrvUlDRGdhZ5nmBh2kpwsibVxWv3o4aDW06CnJDRoERuNDY28fB3RT5zVIPCiaBN6wBBQcw/640?wx_fmt=png&tp=webp&wxfrom=5&wx_lazy=1&wx_co=1" alt="图片" style="zoom: 33%;" />
+
+<img src="https://mmbiz.qpic.cn/mmbiz_png/FNwn7wEvTjj39dNFkSrvUlDRGdhZ5nmBMNJbCeJ74cXk8p5xGaZZElTUfmvTFb9vTPP1nsFbibTpEYMjmPWJH4Q/640?wx_fmt=png&tp=webp&wxfrom=5&wx_lazy=1&wx_co=1" alt="图片" style="zoom:50%;" />
+
 ## 多模态语音识别
 
 #### Attention-based Audio-Visual Fusion for Robust Automatic Speech Recognition
@@ -365,6 +406,22 @@ Compact, Multilingual Speech Recognition via Spoken Language and Accent Identifi
 >
 > code: [georgesterpu/avsr-tf1: Audio-Visual Speech Recognition using Sequence to Sequence Models (github.com)](https://github.com/georgesterpu/avsr-tf1)
 
+
+
+## OpenASR20
+
+amharic、cantonese、guarani。。。
+
+#### AUTOMATIC SPEECH RECOGNITION FOR LOW-RESOURCE LANGUAGES: THE THUEE SYSTEMS FOR THE IARPA OPENASR20 EVALUATION
+
+![image-20211204134146545](readme.assets/image-20211204134146545.png)
+
+![image-20211204134313480](readme.assets/image-20211204134313480.png)
+
+针对低资源、小语种
+
+> [Automatic Speech Recognition for Low-resource Languages and Accents Using Multilingual and Crosslingual Information (d-nb.info)](https://d-nb.info/1051848229/34)
+
 ## zero shot learning
 
 #### Scaling ASR Improves Zero and Few Shot Learning
@@ -374,3 +431,28 @@ Compact, Multilingual Speech Recognition via Spoken Language and Accent Identifi
 工具：
 
 - [hirofumi0810/neural_sp: End-to-end ASR/LM implementation with PyTorch (github.com)](https://github.com/hirofumi0810/neural_sp)
+
+
+
+声音成分分析任务
+
+- 音频场景分类 ASC
+- 音频标记 AI
+- 声音事件检测 SED/AED
+  - 异常声音检测，学习正常的压缩-重构，提取正常样本的本质特征。利用“易于重构正常样本，难以重构异常样本”的特性来检测异常样本
+  - 
+- 基于SED的声音分离
+
+
+
+
+
+说话人识别：怎么处理混合语音
+
+- 把传统的VAD变成Target-speaker VAD based post processing
+
+  > The DKU-DUke-lenovo system description for the Thrid DIHARD Speech diarization challenge
+  >
+  > segment-level speaker embedding similarity measurement in speaker diarization
+  >
+  > online speaker diarization with graph-based label generation
