@@ -313,6 +313,79 @@ Compact, Multilingual Speech Recognition via Spoken Language and Accent Identifi
 
 <img src="readme.assets/image-20211203212854638.png" alt="image-20211203212854638" style="zoom:50%;" />
 
+### Efficient Conformer with Prob-Sparse Attention Mechanism for End-to-End Speech Recognition
+
+> https://mp.weixin.qq.com/s/IJTpNeVa1tNFA1xo-Y8S1w
+
+该论文在conformer种引入了一种概率稀疏的自注意力机制对自注意力的计算过程进行稀疏处理，从而在保持相同错误率的情况下，使得conformer的self-attention模块的推理速度提升了8%-45%，内存使用量也减少了15%-45%。
+
+**动机：**
+
+- 与具有长-短期记忆（LSTM）单元的循环神经网络相比，Transformer具有更高的精度和高效的计算能力，并且拥有对较长的全局上下文建模的能力。但是由于它捕获局部信息的能力较差，而语音识别模型又恰恰需要获取一定的局部信息来关注发音，所以为了同时利用局部上下文和全局上下文，谷歌近期提出了Conformer模型[6]。
+- conformer模型将卷积和Self-Attention结合，它利用卷积来捕获局部信息，以弥补自注意力机制的不足。同时大量的研究表明，Conformer能够获得较好的语音识别精度，并且效率较高。
+- 现有的Conformer-Transducer模型是使用Conformer模块作为Encoder来提高Transducer模型的识别性能。但是对于Conformer而言，Self-Attention仍然扮演着非常重要的角色。在Self-Attention机制下，每个输出都是整个序列的加权组合，这使得它具有对全局信息进行建模的能力。然而，将全局自我注意在应用于ASR任务中有两个问题：
+  - 计算效率：self-attention机制的时间复杂度相对于序列长度T可以达到O(T^2)，因此随着输入序列长度的增加，时间复杂度将以平方倍数的增加，而对于ASR任务，语音信号可以持续几秒到几分钟，输入长度从几十帧到几千帧不等，因此降低计算复杂度是至关重要的，尤其是对于较长的句子。
+  - 信息冗余：许多研究表明，语音识别中存在一定的时间轴上的冗余，这使得self-attention这种逐帧计算的模型结构会存在不必要的计算，一些可能无用或作用不大的计算过程中消耗了部分可以避免的计算量从而导致信息冗余的产生。
+
+为了解决上述问题，同时受到近期Informer[7]工作的启发，我们提出了一种基于概率稀疏度的注意力机制的Conformer-Transducer模型。
+
+具体而言，**我们将注意力机制中的每一个查询对所有键值之间的注意力得分定义为一种概率分布概率，如果这一分布接近均匀分布，则注意力机制退化为平均值，也就证明这一查询是冗余的。**因此，只有注意得分的分布远离均匀分布的查询才能占主导地位。**我们在每层中定义注意力得分的分布和均匀分布之间的Kullback-Leibler（K-L）散度作为稀疏度量，并且仅仅选取稀疏度量最高的U个查询进行计算。**在不降低性能的情况下，基于概率稀疏度的注意力机制方法可以将计算复杂度降低到O(UT)。此外，为了减少稀疏度量的额外计算量，我们还采用了层间稀疏度量共享策略来进一步减少计算量。最终，我们在保持相同水平的语音识别准确率的情况下，使得模型中Self-Attention模块的推理速度提高了8%~45%，内存使用量减少了15%~45%。
+
+**conform-transducer端到端语音识别模型**
+
+<img src="readme.assets/image-20211212101101510.png" alt="image-20211212101101510" style="zoom:50%;" />
+
+- transducer模型能够在给定输入语音特征x的情况下，直接建模x和文本序列y之间的关系，整个模型包括encoder、prediction、joint network。整个transfucer模型在训练中使用前向后向算法来优化厚颜概率分布。
+  - 其中encoder可以获得输入特征x的高维表示。部分结构未conformer，相比于单纯的self-attention而言，conformer模块包括四个部分：马卡龙式的前馈全连接模块、多头自注意力模块、卷积模块和第二个马卡龙式的前馈全连接模块。
+  - prediction的作用是获得历史解码过程中的一个高维表示，这一部分通常由一个嵌入层embedding和若干LSTM组成
+  - joint network是由若干个全连接层组成，其作用是将encoder和prediction输出的高维表示结合在一起，并且通过一个softmax层解码得到最终的分类结果。
+
+**基于概率稀疏的自注意力机制**
+
+给定输入矩阵X，自注意力首先将X映射到查询矩阵Q、键值矩阵K、值矩阵V：
+
+<img src="readme.assets/image-20211212101423299.png" alt="image-20211212101423299" style="zoom:33%;" />
+
+为了更好的描述注意力机制的稀疏度问题，将这一公式重新表示为它的向量形式，具体来说，对于第i个查询多对应的注意力得分可以表示为：
+
+<img src="readme.assets/image-20211212101543442.png" alt="image-20211212101543442" style="zoom:33%;" />
+
+这里我们将p定义为第i个查询对于K的注意力得分，那么第i个查询的自注意力的输出表示为：
+
+<img src="readme.assets/image-20211212101653500.png" alt="image-20211212101653500" style="zoom:33%;" />
+
+在这个过程中，注意机制的时间复杂度为O(L^2)。一般而言，**如果注意力得分的分布服从均匀分布，则注意力机制的输出退化为所有输入值的平均值，则失去了”注意“的能力。**因此，只有当前查询的注意力得分的分布远离均匀分布，这个查询才有效。因此，注意力得分的真实分布P和均匀分布U的Kullback-Leibler（K-L）散度可以用下面的公式表示：
+
+<img src="readme.assets/image-20211212101943050.png" alt="image-20211212101943050" style="zoom:33%;" />
+
+去掉向量后，我们可以得到如下公式：
+
+<img src="readme.assets/image-20211212102022098.png" alt="image-20211212102022098" style="zoom:33%;" />
+
+我们将其定义为该查询的稀疏度$M_{sparse}$，具有较大的稀疏度量的查询在自注意力机制中起着更重要的作用。这样，在注意力机制的计算过程中，我们可以度量每一个查询的稀疏度，从而去掉系数度量较低的查询以简化了整个计算过程，着仍然需要消耗大量的计算。根据相关参考文献[7]的中内容，为了进一步减少该部分的计算量，可以使用抽样方法将稀疏度公式近似为如下表示：
+
+<img src="readme.assets/image-20211212102333719.png" alt="image-20211212102333719" style="zoom:33%;" />
+
+这里使用的键矩阵K是经过随机采样的，其长度为$r_{sample}*ln(L)$，这里的采样都$r_{sample}$是一个常量，用于控制采样的样本数。在获取每个查询的稀疏度之后，我们仅使用稀疏度值值较高的$L_{sparse}$个查询来计算自注意力的输出，其中$L_{sparse} = (r_sparse)*L$，我们称$r_{sparse}$为稀疏度。最后我们使用如下公式来完成自注意力机制的计算：
+
+<img src="readme.assets/image-20211212102712605.png" alt="image-20211212102712605" style="zoom:33%;" />
+
+此外，为了避免逐层计算稀疏度带来的较大计算量，我们使用了层间稀疏度量共享策略，也即每隔$N_{share}$层计算一次稀疏度量，并且在接下来的$(N_{share})-1$层共享这一稀疏度量值。这里称N_share为共享系数。
+
+> [1] Z. Yao, D. Wu, X. Wang, B. Zhang, F. Yu, C. Yang, Z. Peng, X. Chen, L. Xie, "WeNet: Production Oriented Streaming and Non-streaming End-to-End Speech Recognition Toolkit", INTERSPEECH, Brno, Czech Republic, Aug 30 - Sept 3, 2021
+>
+> [2] X. Wang, Z. Yao, X. Shi, L.Xie, "Cascade RNN-Transducer: Syllable Based Streaming On-device Mandarin Speech Recognition with a Syllable-to-Character Converter", SLT2021, January 19-22, Shenzhen, China
+>
+> [3] X. Wang, S. Sun, L. Xie, and L. Ma,  "Efficient Conformer with Prob-Sparse Attention Mechanism for End-to-EndSpeech Recognition", INTERSPEECH, Brno, Czech Republic, Aug 30 - Sept 3, 2021.
+>
+> [4] Y. He, T. N. Sainath, R. Prabhavalkar, I. McGraw, R. Alvarez, D. Zhao, D. Rybach, A. Kannan, Y. Wu, R. Pang et al., "Streaming end-to-end speech recognition for mobile devices," IEEE International Conference on Acoustics, Speech and Signal Processing (ICASSP), 2019, pp. 6381–6385.
+>
+> [5] A. Vaswani, N. Shazeer, N. Parmar, J. Uszkoreit, L. Jones, A. N.Gomez, Ł. Kaiser, and I. Polosukhin, “Attention is all you need,” Advances in neural information processing systems, 2017, pp.5998–6008.
+>
+> [6] A. Gulati, J. Qin, C.-C. Chiu, N. Parmar, Y. Zhang, J. Yu, W. Han, S. Wang, Z. Zhang, Y. Wu, and R. Pang, "Conformer: Convolution augmented transformer for speech recognition," INTERSPEECH, 2020, pp. 5036–5040.
+>
+> [7]  H. Zhou, S. Zhang, J. Peng, S. Zhang, J. Li, H. Xiong, and W. Zhang, “Informer: Beyond efficient transformer for long sequence time-series forecasting,” AAAI, 2021.
+
 ## CTC
 
 #### Why does CTC result in peaky behavior
